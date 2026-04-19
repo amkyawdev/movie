@@ -75,6 +75,37 @@ body {
 .docker-icon {
     width: 24px;
     height: 24px;
+    color: var(--accent-cyan);
+}
+
+.docker-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.docker-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.preview-controls button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.export-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.mobile-nav svg {
+    width: 28px;
+    height: 28px;
+}
+
+.effect-btn svg {
+    width: 32px;
+    height: 32px;
 }
 
 .status-indicator {

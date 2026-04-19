@@ -2,7 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Professional video editing application with animation capabilities, subtitle editing, and conversion tools">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Movie Editor">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Movie Editor Pro">
+    <meta property="og:description" content="Professional video editing application">
+    <meta property="og:site_name" content="Movie Editor Pro">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="apple-touch-icon" href="icons/icon.svg">
+    
     <title>Movie Editor Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="src/style.css">
@@ -12,21 +31,23 @@
         <!-- Docker Control Panel -->
         <div class="docker-panel">
             <div class="docker-header" @click="toggleDocker">
-                <span class="docker-icon">⚙️</span>
+                <svg class="docker-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.034 7.034 0 0 0-1.69-.33l-.46-2.73a.5.5 0 0 0-.5-.47h-4a.5.5 0 0 0-.5.47l-.46 2.73c-.61.1-1.21.2-1.69.33l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.5.5 0 0 0 .12.64L4.57 11a7.063 7.063 0 0 0-.07 1c0 .33.03.65.07.97l-2.11 1.66a.5.5 0 0 0-.12.64l2 3.46c.12.22.4.35.61.22l2.49-1.01c.48.13.98.23 1.69.33l.46 2.73c.04.27.28.47.54.47h4a.5.5 0 0 0 .54-.47l.46-2.73c.61-.1 1.21-.2 1.69-.33l2.49 1.01c.22.09.49 0 .61-.22l2-3.46a.5.5 0 0 0-.12-.64L12.07 12z"/>
+                </svg>
                 <span>Movie Editor Pro</span>
                 <span class="status-indicator" :class="{connected: dockerConnected}"></span>
             </div>
             <div class="docker-controls" v-if="dockerOpen">
                 <button class="docker-btn" @click="startDocker">
-                    <span>▶️</span>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     <span>Start</span>
                 </button>
                 <button class="docker-btn" @click="stopDocker">
-                    <span>⏹️</span>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
                     <span>Stop</span>
                 </button>
                 <button class="docker-btn" @click="restartDocker">
-                    <span>🔄</span>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
                     <span>Restart</span>
                 </button>
             </div>
@@ -39,13 +60,22 @@
                 <div class="preview-header">
                     <h3>Preview</h3>
                     <div class="preview-controls">
-                        <button @click="playVideo" :class="{active: isPlaying}">▶</button>
-                        <button @click="pauseVideo">⏸</button>
-                        <button @click="stopVideo">⏹</button>
+                        <button @click="playVideo" :class="{active: isPlaying}">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                        <button @click="pauseVideo">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        </button>
+                        <button @click="stopVideo">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
+                        </button>
                     </div>
                 </div>
                 <div class="preview-viewport" ref="previewViewport">
                     <div v-if="!currentVideo" class="preview-placeholder" @click="addClip">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
+                            <path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4l5-2-5-2v4h-5v-4h5z"/>
+                        </svg>
                         <p>Drop video here or click to upload</p>
                     </div>
                     <video v-else ref="videoPlayer" :src="videoUrl" @loadedmetadata="onVideoLoaded" @timeupdate="onTimeUpdate"></video>
@@ -112,7 +142,7 @@
                                 class="effect-btn"
                                 :class="{active: selectedMovieAnim === anim.type}"
                                 @click="selectMovieAnimation(anim.type)">
-                            <span>{{ anim.icon }}</span>
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path :d="anim.svg"/></svg>
                             <span>{{ anim.name }}</span>
                         </button>
                     </div>
@@ -230,7 +260,7 @@
                     </div>
                     
                     <button @click="exportVideo" class="export-btn">
-                        <span>⬇️</span>
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                         Export Video
                     </button>
                     
@@ -249,13 +279,37 @@
             <button v-for="tab in effectTabs" :key="tab.id"
                     @click="activeTab = tab.id"
                     :class="{active: activeTab === tab.id}">
-                <span>{{ tab.icon }}</span>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path :d="tab.svg"/></svg>
                 <span>{{ tab.name }}</span>
             </button>
         </div>
     </div>
 
+    <!-- PWA Offline Alert -->
+    <div id="offline-alert" class="offline-alert" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.64 7c-.45-.34-4.93-4-11.64-4-1.5 0-2.89.19-4.15.48L18.18 13.8 23.64 7zm-3.22 7.03L10.86 3.49c-.53-.12-1.03-.2-1.03-.2-.31 0-.56.18-.56.37v.18c0 .17.12.31.35.43l1.6 1.1c.55-.31 1.21-.52 1.99-.52.87 0 1.64.28 2.24.76l4.57 4.97c-.12.06-.24.12-.36.19zM2.92 2.41l.17.11 8.66 5.52c-.54.54-.89 1.24-.89 2.02 0 1.82 2.24 2.96 5.83 2.96.01 0 0 0 0 0-4.31-.19-7.76-3.28-9.8-7.67l2.03-2.94z"/></svg>
+        <span>You're offline</span>
+    </div>
+
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="src/main.js"></script>
+    <script>
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('SW registered:', reg.scope))
+                    .catch(err => console.log('SW registration failed:', err));
+            });
+        }
+        
+        // Offline detection
+        window.addEventListener('offline', () => {
+            document.getElementById('offline-alert').style.display = 'flex';
+        });
+        window.addEventListener('online', () => {
+            document.getElementById('offline-alert').style.display = 'none';
+        });
+    </script>
 </body>
 </html>

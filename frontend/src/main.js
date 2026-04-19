@@ -41,21 +41,21 @@ const app = createApp({
         
         const exportProgress = ref(0)
         
-        // Effect tabs
+        // Effect tabs with SVG
         const effectTabs = ref([
-            { id: 'movie', name: 'Movie', icon: '🎬' },
-            { id: 'text', name: 'Text', icon: '📝' },
-            { id: 'subtitle', name: 'Subtitles', icon: '💬' },
-            { id: 'convert', name: 'Export', icon: '⬇️' }
+            { id: 'movie', name: 'Movie', svg: 'M18 4l2 4h-3l-2-4-2 4h-3l-2 4h3l2 4 2-4h3l2-4h3M4 18h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2z' },
+            { id: 'text', name: 'Text', svg: 'M2.5 4v3h5v12h3V7h5V4h-5m5.5 15h-3v-9h3v9zM15.5 6h3v3h-3V6m0 4.5h3v3h-3v-3m0 4.5h3v3h-3v-3m4.5-9h-3v12h3c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2z' },
+            { id: 'subtitle', name: 'Subtitles', svg: 'M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM5 15h14v2H5z' },
+            { id: 'convert', name: 'Export', svg: 'M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z' }
         ])
         
-        // Movie animations
+        // Movie animations with SVG paths
         const movieAnimations = ref([
-            { name: 'Fade', type: 'fade', icon: '🌫️' },
-            { name: 'Slide', type: 'slide', icon: '➡️' },
-            { name: 'Zoom', type: 'zoom', icon: '🔍' },
-            { name: 'Rotate', type: 'rotate', icon: '🔄' },
-            { name: 'Blur', type: 'blur', icon: '👁️' }
+            { name: 'Fade', type: 'fade', svg: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z' },
+            { name: 'Slide', type: 'slide', svg: 'M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z' },
+            { name: 'Zoom', type: 'zoom', svg: 'M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 0 0 9.5 3 6.5 6.5 0 0 0 3 9.5a6.5 6.5 0 0 0 6.5 6.5c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z' },
+            { name: 'Rotate', type: 'rotate', svg: 'M7.11 8.53L5.7 7.1C4.8 8.27 4.24 9.61 4.07 11h2.02c.14-.87.49-1.72 1.02-2.47zM6.09 13H4.07c.17 1.39.72 2.73 1.62 3.89l1.41-1.42c-.52-.75-.87-1.59-1.01-2.47zm1.01 2.5c.14.88.47 1.72 1.02 2.47l-1.41 1.41c-.9-1.16-1.45-2.5-1.62-3.89h2.01zM20.1 13c-.17-1.39-.72-2.73-1.62-3.89l1.41 1.41c.52.75.87 1.59 1.01 2.47H19.9c-.14-.88-.47-1.72-1.02-2.47zM13 4.07V2.05c-1.39.17-2.73.72-3.89 1.62l1.41 1.41c.75-.52 1.59-.87 2.47-1.01zM11 4.07c-.88.14-1.72.49-2.47 1.02l1.41 1.41c1.16-.9 2.5-1.45 3.89-1.62v2.01c-1.39-.17-2.73-.72-3.89-1.62l1.41-1.41c.75.52 1.59.87 2.47 1.01z' },
+            { name: 'Blur', type: 'blur', svg: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z' }
         ])
         
         // Text animations
