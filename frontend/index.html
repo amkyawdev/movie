@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Editor Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Docker Control Panel -->
+        <div class="docker-panel">
+            <div class="docker-header" @click="toggleDocker">
+                <span class="docker-icon">⚙️</span>
+                <span>Movie Editor Pro</span>
+                <span class="status-indicator" :class="{connected: dockerConnected}"></span>
+            </div>
+            <div class="docker-controls" v-if="dockerOpen">
+                <button class="docker-btn" @click="startDocker">
+                    <span>▶️</span>
+                    <span>Start</span>
+                </button>
+                <button class="docker-btn" @click="stopDocker">
+                    <span>⏹️</span>
+                    <span>Stop</span>
+                </button>
+                <button class="docker-btn" @click="restartDocker">
+                    <span>🔄</span>
+                    <span>Restart</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="editor-container">
+            <!-- Preview Window -->
+            <div class="preview-panel">
+                <div class="preview-header">
+                    <h3>Preview</h3>
+                    <div class="preview-controls">
+                        <button @click="playVideo" :class="{active: isPlaying}">▶</button>
+                        <button @click="pauseVideo">⏸</button>
+                        <button @click="stopVideo">⏹</button>
+                    </div>
+                </div>
+                <div class="preview-viewport" ref="previewViewport">
+                    <div v-if="!currentVideo" class="preview-placeholder" @click="addClip">
+                        <p>Drop video here or click to upload</p>
+                    </div>
+                    <video v-else ref="videoPlayer" :src="videoUrl" @loadedmetadata="onVideoLoaded" @timeupdate="onTimeUpdate"></video>
+                </div>
+                <div class="timeline-scrubber">
+                    <input type="range" :value="currentTime" :max="duration" @input="seekVideo">
+                    <span>{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="timeline-panel">
+                <div class="timeline-header">
+                    <h3>Timeline</h3>
+                    <button @click="addClip" class="add-clip-btn">+ Add Clip</button>
+                </div>
+                <div class="timeline-tracks">
+                    <div class="timeline-track video-track">
+                        <span class="track-label">Video</span>
+                        <div class="track-clips">
+                            <div v-for="(clip, index) in videoClips" :key="index" 
+                                 class="clip" :style="{width: clip.duration * 50 + 'px'}"
+                                 @click="selectClip(clip)">
+                                <span>{{ clip.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-track audio-track">
+                        <span class="track-label">Audio</span>
+                        <div class="track-clips">
+                            <div v-for="(clip, index) in audioClips" :key="index" 
+                                 class="clip" :style="{width: clip.duration * 50 + 'px'}">
+                                <span>{{ clip.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-track subtitle-track">
+                        <span class="track-label">Subtitles</span>
+                        <div class="track-clips">
+                            <div v-for="(sub, index) in subtitles" :key="index" 
+                                 class="clip subtitle-clip" :style="{width: sub.duration * 50 + 'px'}">
+                                <span>{{ sub.text }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Effects Tabs -->
+            <div class="effects-tabs">
+                <button v-for="tab in effectTabs" :key="tab.id" 
+                        @click="activeTab = tab.id"
+                        :class="{active: activeTab === tab.id}">
+                    {{ tab.name }}
+                </button>
+            </div>
+
+            <div class="effects-content">
+                <!-- Movie Effects Panel -->
+                <div v-show="activeTab === 'movie'" class="effects-panel">
+                    <h4>Movie Animations</h4>
+                    <div class="effect-grid">
+                        <button v-for="anim in movieAnimations" :key="anim.type"
+                                class="effect-btn"
+                                :class="{active: selectedMovieAnim === anim.type}"
+                                @click="selectMovieAnimation(anim.type)">
+                            <span>{{ anim.icon }}</span>
+                            <span>{{ anim.name }}</span>
+                        </button>
+                    </div>
+                    
+                    <h4>Color Presets</h4>
+                    <div class="preset-grid">
+                        <button v-for="preset in colorPresets" :key="preset.id"
+                                class="preset-btn"
+                                :class="{active: selectedColorPreset === preset.id}"
+                                @click="selectColorPreset(preset.id)">
+                            <div class="preset-preview" :style="{background: preset.preview}"></div>
+                            <span>{{ preset.name }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Text Effects Panel -->
+                <div v-show="activeTab === 'text'" class="effects-panel">
+                    <h4>Text Animations</h4>
+                    <div class="effect-grid">
+                        <button v-for="anim in textAnimations" :key="anim.type"
+                                class="effect-btn"
+                                :class="{active: selectedTextAnim === anim.type}"
+                                @click="selectTextAnimation(anim.type)">
+                            <span class="anim-preview" :class="anim.effect">Aa</span>
+                            <span>{{ anim.name }}</span>
+                        </button>
+                    </div>
+                    
+                    <h4>Font Styles</h4>
+                    <div class="font-grid">
+                        <button v-for="font in fontStyles" :key="font.id"
+                                class="font-btn"
+                                :class="{active: selectedFont === font.id}"
+                                @click="selectFont(font.id)"
+                                :style="{fontFamily: font.family}">
+                            {{ font.name }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Subtitle Editor Panel -->
+                <div v-show="activeTab === 'subtitle'" class="subtitle-panel">
+                    <h4>Add Subtitle</h4>
+                    <div class="subtitle-form">
+                        <input type="text" v-model="newSubtitle.text" 
+                               placeholder="Enter subtitle text" class="subtitle-input">
+                        <div class="subtitle-options">
+                            <label>
+                                Font Size
+                                <input type="range" v-model="newSubtitle.size" min="16" max="72">
+                                <span>{{ newSubtitle.size }}px</span>
+                            </label>
+                            <label>
+                                Position
+                                <select v-model="newSubtitle.position">
+                                    <option value="top">Top</option>
+                                    <option value="center">Center</option>
+                                    <option value="bottom">Bottom</option>
+                                </select>
+                            </label>
+                            <label>
+                                Color
+                                <select v-model="newSubtitle.color">
+                                    <option value="white">White</option>
+                                    <option value="yellow">Yellow</option>
+                                    <option value="red">Red</option>
+                                    <option value="green">Green</option>
+                                </select>
+                            </label>
+                        </div>
+                        <button @click="addSubtitle" class="add-subtitle-btn">Add Subtitle</button>
+                    </div>
+                    
+                    <h4>Current Subtitles</h4>
+                    <div class="subtitle-list">
+                        <div v-for="(sub, index) in subtitles" :key="index" class="subtitle-item">
+                            <span>{{ sub.text }}</span>
+                            <button @click="removeSubtitle(index)">×</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Converter Panel -->
+                <div v-show="activeTab === 'convert'" class="converter-panel">
+                    <h4>Export Settings</h4>
+                    <div class="converter-form">
+                        <label>
+                            Resolution
+                            <select v-model="exportSettings.resolution">
+                                <option value="480p">480p (854×480)</option>
+                                <option value="720p">720p (1280×720)</option>
+                                <option value="1080p">1080p (1920×1080)</option>
+                                <option value="1440p">1440p (2560×1440)</option>
+                                <option value="4K">4K (3840×2160)</option>
+                            </select>
+                        </label>
+                        <label>
+                            Format
+                            <select v-model="exportSettings.format">
+                                <option value="mp4">MP4</option>
+                                <option value="avi">AVI</option>
+                                <option value="mov">MOV</option>
+                                <option value="mkv">MKV</option>
+                            </select>
+                        </label>
+                        <label>
+                            Quality
+                            <select v-model="exportSettings.quality">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </label>
+                    </div>
+                    
+                    <button @click="exportVideo" class="export-btn">
+                        <span>⬇️</span>
+                        Export Video
+                    </button>
+                    
+                    <div v-if="exportProgress" class="export-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" :style="{width: exportProgress + '%'}"></div>
+                        </div>
+                        <span>{{ exportProgress }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div class="mobile-nav">
+            <button v-for="tab in effectTabs" :key="tab.id"
+                    @click="activeTab = tab.id"
+                    :class="{active: activeTab === tab.id}">
+                <span>{{ tab.icon }}</span>
+                <span>{{ tab.name }}</span>
+            </button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>
