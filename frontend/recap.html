@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Movie Recap - View and manage your edited videos">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Movie Recap">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <title>Movie Recap - Your Projects</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="src/style.css">
+    <link rel="stylesheet" href="src/recap.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="recap-header">
+            <div class="header-content">
+                <h1>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 4l2 4h-3l-2-4-2 4h-3l-2 4h3l2 4 2-4h3l2-4h3M4 18h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2z"/></svg>
+                    Movie Recap
+                </h1>
+                <div class="header-actions">
+                    <button @click="refreshProjects" class="refresh-btn" :class="{spinning: isRefreshing}">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                    </button>
+                    <button @click="showNewProjectModal = true" class="new-project-btn">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                        New Project
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button @click="filter = 'all'" :class="{active: filter === 'all'}">All Projects</button>
+            <button @click="filter = 'recent'" :class="{active: filter === 'recent'}">Recent</button>
+            <button @click="filter = 'favorites'" :class="{active: filter === 'favorites'}">Favorites</button>
+            <button @click="filter = 'exported'" :class="{active: filter === 'exported'}">Exported</button>
+        </div>
+
+        <!-- Projects Grid -->
+        <main class="projects-container">
+            <!-- Loading State -->
+            <div v-if="isLoading" class="loading-state">
+                <div class="loader">
+                    <svg viewBox="0 0 50 50">
+                        <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4"/>
+                    </svg>
+                </div>
+                <p>Loading your projects...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else-if="filteredProjects.length === 0" class="empty-state">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 4l2 4h-3l-2-4-2 4h-3l-2 4h3l2 4 2-4h3l2-4h3M4 18h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2z"/></svg>
+                <h3>No projects yet</h3>
+                <p>Create your first video project</p>
+                <button @click="showNewProjectModal = true" class="create-first-btn">Create Project</button>
+            </div>
+
+            <!-- Projects List -->
+            <div v-else class="projects-grid">
+                <article v-for="project in filteredProjects" :key="project.id" class="project-card">
+                    <!-- Thumbnail -->
+                    <div class="project-thumbnail" :style="{backgroundImage: project.thumbnail ? 'url(' + project.thumbnail + ')' : ''}">
+                        <div class="thumbnail-overlay">
+                            <button @click="playProject(project)" class="play-btn">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                            </button>
+                        </div>
+                        <span class="duration-badge">{{ formatDuration(project.duration) }}</span>
+                        <span v-if="project.isProcessing" class="processing-badge">
+                            <span class="processing-dot"></span> Processing
+                        </span>
+                    </div>
+                    
+                    <!-- Project Info -->
+                    <div class="project-info">
+                        <h3>{{ project.name }}</h3>
+                        <div class="project-meta">
+                            <span class="date">{{ formatDate(project.createdAt) }}</span>
+                            <span class="resolution">{{ project.resolution }}</span>
+                        </div>
+                        
+                        <!-- Effects Applied -->
+                        <div v-if="project.effects && project.effects.length" class="effects-tags">
+                            <span v-for="effect in project.effects.slice(0, 3)" :key="effect" class="effect-tag">
+                                {{ effect }}
+                            </span>
+                            <span v-if="project.effects.length > 3" class="effect-tag more">
+                                +{{ project.effects.length - 3 }}
+                            </span>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="project-actions">
+                            <button @click="toggleFavorite(project)" :class="{active: project.isFavorite}" title="Favorite">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path :d="project.isFavorite ? 'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' : 'M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z'"/></svg>
+                            </button>
+                            <button @click="editProject(project)" title="Edit">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.995.995 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                            </button>
+                            <button @click="exportProject(project)" title="Export" :disabled="project.isProcessing">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+                            </button>
+                            <button @click="deleteProject(project)" title="Delete">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H4v2h15V4z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </main>
+
+        <!-- New Project Modal -->
+        <div v-if="showNewProjectModal" class="modal-overlay" @click.self="showNewProjectModal = false">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Create New Project</h2>
+                    <button @click="showNewProjectModal = false" class="close-btn">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Project Name</label>
+                        <input type="text" v-model="newProject.name" placeholder="My Awesome Video">
+                    </div>
+                    <div class="form-group">
+                        <label>Resolution</label>
+                        <select v-model="newProject.resolution">
+                            <option value="1080p">1080p (1920×1080)</option>
+                            <option value="720p">720p (1280×720)</option>
+                            <option value="4K">4K (3840×2160)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Upload Video</label>
+                        <div class="file-drop-zone" @click="triggerFileInput" @dragover.prevent @drop.prevent="handleFileDrop">
+                            <input type="file" ref="fileInput" accept="video/*" @change="handleFileSelect" style="display:none">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4l5-2-5-2v4h-5v-4h5z"/></svg>
+                            <p v-if="!newProject.file">Drop video here or click to upload</p>
+                            <p v-else>{{ newProject.file.name }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button @click="showNewProjectModal = false" class="cancel-btn">Cancel</button>
+                    <button @click="createProject" class="create-btn" :disabled="!canCreate">Create Project</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Modal -->
+        <div v-if="processingProject" class="processing-modal">
+            <div class="processing-content">
+                <div class="processing-animation">
+                    <div class="wave-loader">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+                <h2>{{ processingProject.title }}</h2>
+                <p>{{ processingProject.message }}</p>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" :style="{width: processingProgress + '%'}"></div>
+                    </div>
+                    <span class="progress-text">{{ processingProgress }}%</span>
+                </div>
+                <button v-if="processingProject.cancelable" @click="cancelProcessing" class="cancel-processing-btn">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container">
+            <div v-for="toast in toasts" :key="toast.id" class="toast" :class="toast.type">
+                <svg v-if="toast.type === 'success'" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                <svg v-else-if="toast.type === 'error'" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span>{{ toast.message }}</span>
+                <button @click="removeToast(toast.id)">×</button>
+            </div>
+        </div>
+
+        <!-- Mobile Bottom Nav -->
+        <nav class="mobile-bottom-nav">
+            <button @click="$emit('navigate', 'editor')" class="nav-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+                <span>Editor</span>
+            </button>
+            <button class="nav-btn active">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+                <span>Recap</span>
+            </button>
+            <button class="nav-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                <span>Export</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="src/recap.js"></script>
+</body>
+</html>

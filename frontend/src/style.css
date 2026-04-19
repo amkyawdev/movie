@@ -810,3 +810,186 @@ kbd {
         height: 44px;
     }
 }
+
+/* ======== Waiting / Processing Animations ======== */
+
+/* Wave Animation */
+.wave-loader {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 40px;
+    gap: 4px;
+}
+
+.wave-loader span {
+    width: 6px;
+    background: var(--accent-cyan);
+    border-radius: 3px;
+    animation: wave 1s ease-in-out infinite;
+}
+
+.wave-loader span:nth-child(1) { animation-delay: 0s; }
+.wave-loader span:nth-child(2) { animation-delay: 0.1s; }
+.wave-loader span:nth-child(3) { animation-delay: 0.2s; }
+.wave-loader span:nth-child(4) { animation-delay: 0.3s; }
+.wave-loader span:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes wave {
+    0%, 100% { height: 10px; transform: scaleY(1); }
+    50% { height: 40px; transform: scaleY(1.5); }
+}
+
+/* Pulse Ring Animation */
+.pulse-ring {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.pulse-ring::before,
+.pulse-ring::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid var(--accent-cyan);
+    animation: pulseRing 2s ease-out infinite;
+}
+
+.pulse-ring::after {
+    animation-delay: 0.5s;
+}
+
+@keyframes pulseRing {
+    0% { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Rotating Dots */
+.rotating-dots {
+    position: relative;
+    width: 50px;
+    height: 50px;
+}
+
+.rotating-dots span {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--accent-purple);
+    border-radius: 50%;
+    animation: rotateDot 1.5s linear infinite;
+}
+
+.rotating-dots span:nth-child(1) { --angle: 0deg; }
+.rotating-dots span:nth-child(2) { --angle: 72deg; animation_delay: 0.1s; }
+.rotating-dots span:nth-child(3) { --angle: 144deg; animation_delay: 0.2s; }
+.rotating-dots span:nth-child(4) { --angle: 216deg; animation_delay: 0.3s; }
+.rotating-dots span:nth-child(5) { --angle: 288deg; animation_delay: 0.4s; }
+
+@keyframes rotateDot {
+    from { transform: rotate(var(--angle)) translate(20px) rotate(calc(-1 * var(--angle))); }
+}
+
+/* Processing Overlay */
+.processing-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    backdrop-filter: blur(10px);
+}
+
+.processing-overlay-content {
+    text-align: center;
+}
+
+.processing-overlay h2 {
+    margin: var(--space-lg) 0 var(--space-sm);
+    font-size: var(--font-xl);
+}
+
+.processing-overlay p {
+    color: var(--ui-text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+/* Spinner */
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--ui-border);
+    border-top-color: var(--accent-cyan);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Progress Bar With Animated Stripes */
+.progress-animated {
+    height: 8px;
+    background: var(--ui-border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-animated-fill {
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        var(--accent-cyan) 0%,
+        var(--accent-purple) 50%,
+        var(--accent-cyan) 100%
+    );
+    background-size: 200% 100%;
+    animation: progressStripe 1s linear infinite;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+@keyframes progressStripe {
+    from { background-position: 100% 0; }
+    to { background-position: -100% 0; }
+}
+
+/* Skeleton Loading */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--ui-bg) 25%,
+        var(--ui-border) 50%,
+        var(--ui-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton 1.5s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+    height: 16px;
+    margin-bottom: var(--space-sm);
+}
+
+.skeleton-title {
+    height: 24px;
+    width: 60%;
+    margin-bottom: var(--space-md);
+}
+
+.skeleton-image {
+    aspect-ratio: 16/9;
+    border-radius: var(--radius-md);
+}
